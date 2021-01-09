@@ -1,8 +1,10 @@
+from collections import Counter
 import numpy as np
 import h5py
 import random
 import math
 from collections import Counter, defaultdict
+from profiler import profile
 """
 PADDING = 8
 
@@ -66,10 +68,12 @@ def augment_data(data, results):
     return np.array(augmented), one_hot(augmented_results, results.shape[1])
  """
 
- from collections.abc import Sequence
+from collections.abc import Sequence
 
 PADDING = 8
 
+
+# @profile()
 def get_shape(lst, shape=()):
     """
     returns the shape of nested lists similarly to numpy's shape.
@@ -99,6 +103,8 @@ def get_shape(lst, shape=()):
 
     return shape
 
+
+# @profile()
 def augment_sample(elem: list, wanted_samples=1):
     if wanted_samples < 1:
         return [elem]
@@ -115,12 +121,14 @@ def augment_sample(elem: list, wanted_samples=1):
         new_elem = elem[slice_amount:]
         new_elem.extend(elem[:slice_amount])
         elems_augmented.append(
-            [new_elem])
+            new_elem)
+        assert len(new_elem) == len(elem)
 
     assert len(elems_augmented) == wanted_samples
     return elems_augmented
 
 
+@profile()
 def augment_samples(arr: list, wanted_samples=0):
     if wanted_samples < len(arr):
         return arr
@@ -137,6 +145,7 @@ def augment_samples(arr: list, wanted_samples=0):
     return X_augmented
 
 
+# @profile()
 def augment_data(data, results):
     unhot_results = de_one_hot(results)
     c = Counter(unhot_results)
@@ -152,13 +161,13 @@ def augment_data(data, results):
             augmented.append(elem)
             augmented_results.append(elem_class)
         else:
-            #Mi voglio salvare solo gli indici in cui ho bisogno di fare augmentation
+            # Mi voglio salvare solo gli indici in cui ho bisogno di fare augmentation
             to_augment[elem_class].append(ind)
 
     for elem_class, elems_ind in to_augment.items():
-        x = augment_samples([e.tolist() for e in data[elems_ind]] , wanted)
+        x = augment_samples([e.tolist() for e in data[elems_ind]], wanted)
         print(get_shape(x))
-        np.append(data, np.array([x]), axis=0)
+        np.append(data, np.array(x), axis=0)
         np.append(results, np.array([elem_class*wanted]))
 
     return np.array(data), one_hot(results, results.shape[1])
@@ -180,11 +189,17 @@ def one_hot(a, n):
 def de_one_hot(y):
     return np.argmax(y, axis=1)
 
+
 augmented_data, augmented_results = augment_data(X, y)
 
-file_h5 = 'augmented_train.h5'
-f = h5py.File(file_h5, 'w')
-f.create_dataset('X', data=augmented_data)
-f.create_dataset('y', data=augmented_results)
-f.close()
 
+c = Counter(de_one_hot(augmented_results))
+
+print(c)
+
+
+# file_h5 = 'augmented_train.h5'
+# f = h5py.File(file_h5, 'w')
+# f.create_dataset('X', data=augmented_data)
+# f.create_dataset('y', data=augmented_results)
+# f.close()
