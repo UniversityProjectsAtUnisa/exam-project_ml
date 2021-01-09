@@ -3,8 +3,10 @@ import h5py
 import random
 import math
 from collections import Counter, defaultdict
+from utils import one_hot, de_one_hot
 
 PADDING = 8
+
 
 def augment_sample(elem: np.ndarray, wanted_samples=1):
     if wanted_samples < 1:
@@ -66,25 +68,16 @@ def augment_data(data, results):
     return np.array(augmented), one_hot(augmented_results, results.shape[1])
 
 
-file_h5 = './data/train.h5'
+file_h5 = './data/pre_augment_train.h5'
 f = h5py.File(file_h5, 'r')
 X = f['X'][...]
 y = f['y'][...]
 f.close()
 
 
-def one_hot(a, n):
-    e = np.eye(n)  # Identity matrix n x n
-    result = e[a]
-    return result
-
-
-def de_one_hot(y):
-    return np.argmax(y, axis=1)
-
 augmented_data, augmented_results = augment_data(X, y)
 
-file_h5 = 'augmented_train.h5'
+file_h5 = './data/augmented_train.h5'
 f = h5py.File(file_h5, 'w')
 f.create_dataset('X', data=augmented_data)
 f.create_dataset('y', data=augmented_results)
