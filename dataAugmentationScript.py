@@ -4,8 +4,6 @@ import math
 from collections import Counter, defaultdict
 from utils import one_hot, de_one_hot
 
-PADDING = 8
-
 
 def augment_sample(elem: np.ndarray, wanted_samples=1):
     if wanted_samples < 1:
