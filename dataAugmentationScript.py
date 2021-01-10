@@ -15,7 +15,7 @@ def augment_sample(elem: np.ndarray, wanted_samples=1):
     elems_augmented = [elem]
 
     total = (elem.shape[0])
-    slice_amounts = [(i * total/(wanted_samples+1))
+    slice_amounts = [(i * total//(wanted_samples+1))
                      for i in range(1, wanted_samples+1)]
 
     for slice_amount in slice_amounts:
