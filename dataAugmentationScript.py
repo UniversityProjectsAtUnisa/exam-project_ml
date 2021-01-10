@@ -1,6 +1,5 @@
 import numpy as np
 import h5py
-import random
 import math
 from collections import Counter, defaultdict
 from utils import one_hot, de_one_hot
@@ -17,8 +16,9 @@ def augment_sample(elem: np.ndarray, wanted_samples=1):
 
     elems_augmented = [elem]
 
-    slice_amounts = random.sample(
-        range(PADDING, elem.shape[0]-PADDING), k=wanted_samples-1)
+    total = (elem.shape[0])
+    slice_amounts = [(i * total/(wanted_samples+1))
+                     for i in range(1, wanted_samples+1)]
 
     for slice_amount in slice_amounts:
         elems_augmented.append(
